@@ -1,0 +1,16 @@
+[Unit]
+Description=Jewel AI FastAPI app (uvicorn)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/home/ubuntu/Jewel
+# Path to your virtualenv's uvicorn (adjust to your install location)
+Environment="PATH=/home/ubuntu/Jewel/.venv/bin"
+ExecStart=/home/ubuntu/Jewel/.venv/bin/uvicorn server.app:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

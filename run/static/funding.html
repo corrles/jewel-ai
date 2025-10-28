@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jewel – Funding One-Pager</title>
+  <link rel="manifest" href="/ui/manifest.json">
+  <style>
+    :root { --primary:#667eea; --secondary:#764ba2; --text:#1f2937; --bg:#f8fafc; --card:#ffffff; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--text); }
+    header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color:#fff; padding:24px; }
+    header .wrap { max-width: 980px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; }
+    header h1 { margin:0; font-size: 24px; }
+    header a { color:#fff; text-decoration:none; background: rgba(255,255,255,0.2); padding:8px 12px; border-radius:8px; }
+    main { max-width:980px; margin:24px auto; padding: 0 16px; }
+    section { background:var(--card); border:1px solid #e5e7eb; border-radius:12px; padding:20px; margin-bottom:16px; }
+    h2 { margin:0 0 10px 0; font-size:18px; color:#111827; }
+    ul { margin:8px 0 0 20px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .badge { display:inline-block; padding:4px 8px; border-radius:999px; background:#eef2ff; color:#3730a3; font-weight:600; font-size:12px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .cta { display:flex; gap:12px; align-items:center; }
+    .cta a { background:#10b981; color:#fff; padding:10px 14px; border-radius:8px; text-decoration:none; font-weight:700; }
+    .cta .secondary { background:#6b7280; }
+    footer { text-align:center; color:#6b7280; padding:24px; font-size:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>💎 Jewel – Emotional AI Companion</h1>
+      <div class="row">
+        <a href="/ui/chat_enhanced.html">↩ Back to App</a>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section>
+      <span class="badge">Vision</span>
+      <h2>Purpose</h2>
+      <p>Jewel is a personalized, multimodal AI companion designed for everyday support and connection—text, voice, vision, and video. Built with a focus on empathy, customizability, and real-world usefulness.</p>
+    </section>
+
+    <section class="grid">
+      <div>
+        <span class="badge">Highlights</span>
+        <h2>What’s working now</h2>
+        <ul>
+          <li>Fast web UI with themes and voice</li>
+          <li>OpenAI chat (gpt-4o-mini) with memory</li>
+          <li>Voice: OpenAI TTS or Azure Speech</li>
+          <li>Vision: image understanding (gpt-4o)</li>
+          <li>Video: YouTube transcript summarization</li>
+        </ul>
+      </div>
+      <div>
+        <span class="badge">Demo</span>
+        <h2>Screenshots / Link</h2>
+        <ul>
+          <li>Live demo: http://localhost:8000/ui/chat_enhanced.html (LAN)</li>
+          <li>Replace with public URL when deployed</li>
+          <li>Drop screenshots here when ready</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <span class="badge">Budget</span>
+      <h2>Current funding goal</h2>
+      <p>Seeking $1,000 to cover ~6 months of development and demo costs.</p>
+      <div class="grid">
+        <div>
+          <ul>
+            <li>OpenAI API (capped): $50/month</li>
+            <li>Domain + DNS: ~$1/month</li>
+            <li>VPS/hosting: $5–10/month</li>
+            <li>Backups/monitoring: ~$5/month</li>
+          </ul>
+        </div>
+        <div>
+          <ul>
+            <li><strong>Total baseline:</strong> ~$60–$70/month</li>
+            <li>Stretch: ads, analytics, email → +$10–$20</li>
+            <li>Azure for Students can cover Speech credits</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cta" style="margin-top:10px;">
+        <a href="#" onclick="alert('Link your Ko-fi/Patreon here')">❤️ Become a Patron</a>
+        <a class="secondary" href="#" onclick="alert('Add contact or grant form link')">📩 Contact</a>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div>
+        <span class="badge">Roadmap</span>
+        <h2>Near-term</h2>
+        <ul>
+          <li>Investor/demo site with public URL</li>
+          <li>On-device analytics (privacy-first) and usage meter</li>
+          <li>Simple “early access” program for testers</li>
+        </ul>
+      </div>
+      <div>
+        <span class="badge">Programs</span>
+        <h2>Grants & Credits</h2>
+        <ul>
+          <li>Azure for Students – $100 credits (Speech)</li>
+          <li>Microsoft for Startups Founders Hub</li>
+          <li>Replit Build / Creator Grants</li>
+          <li>Hugging Face Open-Source Grant</li>
+          <li>AI Grant (when public demo is live)</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <footer>
+    © 2025 Jewel. Built with love and a little bit of stardust.
+  </footer>
+</body>
+</html>

@@ -1,0 +1,1241 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#667eea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Jewel - AI Companion</title>
+  <link rel="manifest" href="/ui/manifest.json">
+  <script async src="https://cse.google.com/cse.js?cx=e6fa40bf55fa845e8"></script>
+  <style>
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --bg: #f5f5f5;
+      --card: white;
+      --text: #333;
+      --bg-opacity: 0.3;
+      --bg-blur: 0px;
+    }
+    
+    [data-theme="blue"] {
+      --primary: #4a90e2;
+      --secondary: #357abd;
+    }
+    
+    [data-theme="green"] {
+      --primary: #48bb78;
+      --secondary: #38a169;
+    }
+    
+    [data-theme="pink"] {
+      --primary: #ed64a6;
+      --secondary: #d53f8c;
+    }
+    
+    [data-theme="dark"] {
+      --primary: #9f7aea;
+      --secondary: #805ad5;
+      --bg: #1a202c;
+      --card: #2d3748;
+      --text: #e2e8f0;
+    }
+    
+    [data-theme="bats"] {
+      --primary: #a78bfa;
+      --secondary: #8b5cf6;
+      --bg: #0f0f23;
+      --card: #1e1b2e;
+      --text: #e0d7ff;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="40" opacity="0.05">🦇</text></svg>');
+      background-repeat: repeat;
+      background-size: 100px 100px;
+    }
+    
+    [data-theme="ocean"] {
+      --primary: #06b6d4;
+      --secondary: #0891b2;
+      --bg: #0c1e2e;
+      --card: #1a3a52;
+      --text: #cfe8f3;
+    }
+    
+    [data-theme="stars"] {
+      --primary: #fbbf24;
+      --secondary: #f59e0b;
+      --bg: #0a0e27;
+      --card: #1a1f3a;
+      --text: #fef3c7;
+      background-image: radial-gradient(circle, white 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+    
+    [data-theme="forest"] {
+      --primary: #10b981;
+      --secondary: #059669;
+      --bg: #0a2818;
+      --card: #1a4d2e;
+      --text: #d1fae5;
+    }
+    
+    * { box-sizing: border-box; }
+    body { 
+      font-family: system-ui, -apple-system, Roboto, 'Segoe UI', Arial; 
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+    }
+    #header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white; padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex; justify-content: space-between; align-items: center;
+      position: relative;
+    }
+    #header h2 { margin: 0; font-size: 20px; font-weight: 600; }
+    #settingsBtn {
+      background: rgba(255,255,255,0.2); border: none;
+      color: white; padding: 8px 16px; border-radius: 6px;
+      cursor: pointer; font-weight: 500;
+    }
+    #settingsBtn:hover { background: rgba(255,255,255,0.3); }
+    #usageBadge {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-left: 8px;
+    }
+    
+    /* Dropdown menu instead of slide-out panel */
+    #settingsDropdown {
+      position: absolute; top: 100%; right: 20px;
+      width: 350px; max-height: 80vh;
+      background: var(--card); 
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 20px; 
+      overflow-y: auto;
+      /* ensure the dropdown sits above the click-blocking scrim */
+      z-index: 1002;
+      display: none;
+      margin-top: 8px;
+      pointer-events: auto;
+    }
+    #settingsDropdown.open { display: block; }
+    #settingsDropdown h3 { 
+      margin-top: 0; 
+      color: var(--primary); 
+      margin-bottom: 16px;
+    }
+    #settingsDropdown label {
+      display: block; margin: 12px 0 4px;
+      font-weight: 500; font-size: 13px;
+    }
+    #settingsDropdown select, #settingsDropdown input[type="number"], #settingsDropdown input[type="color"] {
+      width: 100%; padding: 8px; border: 1px solid #ddd;
+      border-radius: 6px; font-family: inherit;
+      background: var(--bg); color: var(--text);
+    }
+    #settingsDropdown input[type="file"] {
+      width: 100%; padding: 4px; font-size: 13px;
+    }
+    #settingsDropdown button {
+      margin-top: 12px; padding: 10px; width: 100%;
+      background: var(--primary); color: white;
+      border: none; border-radius: 6px; cursor: pointer;
+      font-weight: 600;
+    }
+    #settingsDropdown button:hover { opacity: 0.9; }
+    
+    /* Scrim for dropdown */
+    #settingsScrim {
+      position: fixed; inset: 0; 
+      /* keep scrim below header/dropdown so it doesn't eat clicks */
+      z-index: 900;
+      display: none;
+    }
+    #settingsScrim.active {
+      display: block;
+    }
+    
+    /* Background image layer */
+    #bg {
+      position: fixed; inset: 0; z-index: 0;
+      background-size: cover; background-position: center center;
+      opacity: var(--bg-opacity);
+      filter: blur(var(--bg-blur));
+      pointer-events: none;
+      transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+    
+    /* Ensure content is above the background image */
+    /* Raise header above scrim; dropdown will sit above header */
+    #header { position: relative; z-index: 1001; }
+    #settingsPanel, #chat, #bottom { position: relative; z-index: 1; }
+    
+    #chat { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 20px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .msg { 
+      margin-bottom: 12px; padding: 10px 14px;
+      border-radius: 8px; max-width: 85%;
+      word-wrap: break-word; white-space: pre-wrap;
+    }
+    .msg.you { 
+      background: var(--primary); color: white;
+      margin-left: auto; text-align: right;
+    }
+    .msg.jewel { 
+      background: var(--card); color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .msg .label { 
+      font-size: 11px; opacity: 0.8; 
+      margin-bottom: 4px; font-weight: 600;
+    }
+    #bottom {
+      background: var(--card); padding: 12px 20px;
+      border-top: 1px solid #ddd;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    #controls {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .pill {
+      padding: 8px 16px; border: 1px solid var(--primary);
+      background: var(--card); color: var(--primary);
+      border-radius: 20px; cursor: pointer;
+      font-size: 13px; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .pill:hover {
+      background: var(--primary); color: white;
+    }
+    .pill.recording {
+      background: #e53e3e; color: white;
+      border-color: #e53e3e;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    #inputRow {
+      display: flex; gap: 8px;
+    }
+    #txt {
+      flex: 1; padding: 12px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 14px;
+      font-family: inherit;
+      background: var(--bg); color: var(--text);
+    }
+    #send {
+      padding: 12px 24px; background: var(--primary);
+      color: white; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 600;
+      transition: background 0.2s;
+    }
+    #send:hover { opacity: 0.9; }
+    .form-panel {
+      padding: 12px; background: var(--bg);
+      border-radius: 8px; border: 1px solid #ddd;
+    }
+    .form-panel input[type="file"] {
+      margin-bottom: 8px;
+    }
+    .form-panel input[type="text"], .form-panel input[type="url"] {
+      width: 100%; padding: 8px; border: 1px solid #ddd;
+      border-radius: 6px; margin-bottom: 8px;
+      font-family: inherit; font-size: 14px;
+      background: var(--card); color: var(--text);
+    }
+    .form-panel button {
+      padding: 8px 16px; background: var(--secondary);
+      color: white; border: none; border-radius: 6px;
+      cursor: pointer; font-weight: 500;
+    }
+    .form-panel button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body data-theme="purple">
+  <div id="bg"></div>
+  <div id="settingsScrim"></div>
+  <div id="header">
+    <h2>💎 Jewel</h2>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div id="usageBadge" title="Estimated monthly spend">$0.00 / $50</div>
+  <a href="/ui/progress.html" style="text-decoration:none; margin-left:8px;"><button id="progressBtn" style="background:rgba(255,255,255,0.15); color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">📈 Progress</button></a>
+  <button id="teamBtn">👥 Team</button>
+      <button id="settingsBtn">⚙️ Customize</button>
+    </div>
+    
+    <div id="settingsDropdown">
+      <h3>Customize Jewel</h3>
+    
+    <label>UI Theme</label>
+    <select id="themeSelect">
+      <option value="purple">Purple (Default)</option>
+      <option value="blue">Blue Ocean</option>
+      <option value="green">Forest Green</option>
+      <option value="pink">Bubblegum Pink</option>
+      <option value="dark">Dark Mode</option>
+      <option value="bats">🦇 Bats</option>
+      <option value="ocean">🌊 Deep Ocean</option>
+      <option value="stars">⭐ Starfield</option>
+      <option value="forest">🌲 Forest Night</option>
+    </select>
+    
+    <label>Voice</label>
+    <select id="voiceSelect">
+      <optgroup label="Azure Neural (Most Human)">
+        <option value="en-US-AvaMultilingualNeural">Ava - warm, conversational</option>
+        <option value="en-US-EmmaMultilingualNeural">Emma - friendly, clear</option>
+        <option value="en-US-JennyNeural">Jenny - professional, natural</option>
+        <option value="en-US-AriaNeural">Aria - upbeat, expressive</option>
+        <option value="en-US-SaraNeural">Sara - calm, soothing</option>
+        <option value="en-US-MichelleNeural">Michelle - energetic, lively</option>
+        <option value="en-US-AndrewMultilingualNeural">Andrew - confident (male)</option>
+        <option value="en-US-BrianMultilingualNeural">Brian - casual (male)</option>
+        <option value="en-US-DavisNeural">Davis - warm (male)</option>
+        <option value="en-US-GuyNeural">Guy - mature (male)</option>
+      </optgroup>
+      <optgroup label="OpenAI (Fast, Good Quality)">
+        <option value="nova">Nova - warm, friendly</option>
+        <option value="alloy">Alloy - neutral</option>
+        <option value="shimmer">Shimmer - soft, expressive</option>
+        <option value="echo">Echo - clear (male)</option>
+        <option value="fable">Fable - expressive</option>
+        <option value="onyx">Onyx - deep, authoritative (male)</option>
+      </optgroup>
+    </select>
+    <button id="voicePreview" type="button" style="margin-top:8px; background: var(--secondary); color:#fff; border:none; border-radius:6px; padding:8px 12px; cursor:pointer;">▶ Preview voice</button>
+    
+    <label>Response Style</label>
+    <select id="styleSelect">
+      <option value="friendly">Friendly</option>
+      <option value="professional">Professional</option>
+      <option value="playful">Playful</option>
+      <option value="thoughtful">Thoughtful</option>
+    </select>
+    
+    <label>Creativity (0.0 - 1.0)</label>
+    <input id="tempInput" type="number" min="0" max="1" step="0.1" value="0.7" />
+    
+    <label>Custom Colors</label>
+    <div style="display:flex; gap:8px;">
+      <div style="flex:1">
+        <small>Primary</small>
+        <input id="colorPrimary" type="color" value="#667eea" />
+      </div>
+      <div style="flex:1">
+        <small>Secondary</small>
+        <input id="colorSecondary" type="color" value="#764ba2" />
+      </div>
+    </div>
+
+    <label style="margin-top:12px">Background Image</label>
+    <input id="bgFile" type="file" accept="image/*" />
+    <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+      <div style="flex:1">
+        <small>Opacity</small>
+        <input id="bgOpacity" type="range" min="0" max="100" value="30" />
+      </div>
+      <div style="flex:1">
+        <small>Blur</small>
+        <input id="bgBlur" type="range" min="0" max="12" value="0" />
+      </div>
+    </div>
+    <button id="bgClear" style="background:#a0aec0; margin-top:8px;">Remove Background</button>
+    
+    <label style="margin-top:16px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="speakToggle"> Speak replies
+    </label>
+    <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+      <button id="reEnableTTS" style="flex:1; background:#48bb78; color:#fff; border:none; border-radius:6px; padding:8px; cursor:pointer;">Re-enable TTS now</button>
+      <input id="ttsCooldownMinutes" type="number" min="1" max="60" value="10" style="width:80px; padding:6px; border:1px solid #ddd; border-radius:6px;" />
+      <small style="color:#666;">cooldown (min)</small>
+    </div>
+    
+    <hr style="margin:12px 0; border:none; border-top:1px solid #eee" />
+    <h4 style="margin:6px 0 8px; color:var(--primary)">Persona (private)</h4>
+    <label>Display name</label>
+    <input id="personaName" type="text" placeholder="Jewel" />
+    <label>Favorite color</label>
+    <input id="personaColor" type="color" value="#667eea" />
+    <label style="display:flex; gap:8px; align-items:center; margin-top:8px;"><input id="personaLikesTV" type="checkbox"> Likes watching TV</label>
+    <label style="display:flex; gap:8px; align-items:center;"><input id="personaLikesReading" type="checkbox"> Likes reading</label>
+    <label style="margin-top:8px">Core traits (comma separated)</label>
+    <input id="personaTraits" type="text" placeholder="curious, helpful" />
+    <label style="margin-top:8px; display:flex; align-items:center; gap:8px;"><input id="personaReflection" type="checkbox"> Enable private reflections (opt-in)</label>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="savePersona" type="button" style="flex:1">Save Persona</button>
+      <button id="resetPersona" type="button" style="flex:1; background:#e53e3e;">Reset</button>
+    </div>
+
+    <label style="margin-top:12px">Local secret (for private reflections)</label>
+    <input id="localSecretInput" type="password" placeholder="Paste local secret (stored in browser)" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; background:var(--card); color:var(--text);" />
+    <small style="display:block; margin-top:6px; color:#666;">This secret is stored only in your browser localStorage and is used to fetch/reset private reflections from the local server.</small>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="showReflections" type="button" style="flex:1">Show Reflections</button>
+      <button id="resetReflections" type="button" style="flex:1; background:#e53e3e;">Reset Reflections</button>
+    </div>
+
+    <hr style="margin:12px 0; border:none; border-top:1px solid #eee" />
+    <h4 style="margin:6px 0 8px; color:var(--primary)">Emotion</h4>
+    <div id="emotionDisplay" style="font-size:13px; margin-bottom:8px;">Valence: 0.0 — Arousal: 0.0</div>
+    <label>Quick trigger tag</label>
+    <input id="emotionTag" type="text" placeholder="happy, curious" />
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="triggerEmotion" type="button" style="flex:1">Trigger Emotion</button>
+      <button id="resetEmotionBtn" type="button" style="flex:1; background:#e53e3e;">Reset Emotion</button>
+    </div>
+
+    <button id="saveSettings" type="button">Save Settings</button>
+    </div>
+  </div>
+  
+  <div id="chat"></div>
+  <audio id="speaker" style="display:none" controls></audio>
+  
+  <div id="bottom">
+    <div id="controls">
+      <button class="pill" id="micBtn">🎤 Speak</button>
+      <button class="pill" id="imgBtn">📷 Image</button>
+      <button class="pill" id="vidBtn">🎬 YouTube</button>
+      <button class="pill" id="searchBtn">🔍 Google</button>
+    </div>
+    
+    <form id="imgForm" class="form-panel" style="display:none">
+      <input id="imgFile" type="file" accept="image/*">
+      <input id="imgPrompt" type="text" placeholder="Prompt (optional)" />
+      <button id="imgSend" type="button">Analyze</button>
+    </form>
+    
+    <div id="vidForm" class="form-panel" style="display:none">
+      <input id="vidURL" type="url" placeholder="Video URL (YouTube, Twitter, TikTok, etc.)">
+      <label style="display:flex; align-items:center; gap:8px; margin:6px 0;">
+        <input id="quickMode" type="checkbox"> Quick mode (1 frame, cheaper & faster)
+      </label>
+      <button id="vidSumm">Analyze Video</button>
+    </div>
+    
+    <div id="googleForm" class="form-panel" style="display:none">
+      <div class="gcse-search"></div>
+    </div>
+    
+    <div id="inputRow">
+      <input id="txt" placeholder="Type a message..." />
+      <button id="send">Send</button>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+const chat = document.getElementById('chat');
+const txt = document.getElementById('txt');
+const send = document.getElementById('send');
+const micBtn = document.getElementById('micBtn');
+const imgBtn = document.getElementById('imgBtn');
+const imgForm = document.getElementById('imgForm');
+const imgFile = document.getElementById('imgFile');
+const imgPrompt = document.getElementById('imgPrompt');
+const imgSend = document.getElementById('imgSend');
+const vidBtn = document.getElementById('vidBtn');
+const vidForm = document.getElementById('vidForm');
+const vidURL = document.getElementById('vidURL');
+const vidSumm = document.getElementById('vidSumm');
+const searchBtn = document.getElementById('searchBtn');
+const googleForm = document.getElementById('googleForm');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsDropdown = document.getElementById('settingsDropdown');
+const settingsScrim = document.getElementById('settingsScrim');
+const saveSettings = document.getElementById('saveSettings');
+const themeSelect = document.getElementById('themeSelect');
+const voiceSelect = document.getElementById('voiceSelect');
+const voicePreview = document.getElementById('voicePreview');
+const styleSelect = document.getElementById('styleSelect');
+const tempInput = document.getElementById('tempInput');
+const speakToggle = document.getElementById('speakToggle');
+const speaker = document.getElementById('speaker');
+const colorPrimary = document.getElementById('colorPrimary');
+const colorSecondary = document.getElementById('colorSecondary');
+const bgDiv = document.getElementById('bg');
+const bgFile = document.getElementById('bgFile');
+const bgOpacity = document.getElementById('bgOpacity');
+const bgBlur = document.getElementById('bgBlur');
+const bgClear = document.getElementById('bgClear');
+const usageBadge = document.getElementById('usageBadge');
+
+let mediaRecorder;
+let audioChunks = [];
+
+function add(who, msg){
+  const div = document.createElement('div');
+  div.className = 'msg ' + (who === 'You' ? 'you' : 'jewel');
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = who;
+  div.appendChild(label);
+  const content = document.createTextNode(msg);
+  div.appendChild(content);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  // Only try TTS if speak is enabled, message is short, and it's not an error
+  if(who === 'Jewel' && speakToggle.checked && msg.length <= 300 && !msg.includes('(TTS disabled)') && !msg.includes('error)')){
+    ttsSpeak(msg);
+  }
+  // Update usage meter
+  if (typeof refreshUsage === 'function') { try { refreshUsage(); } catch(e){} }
+  return div;
+}
+
+async function askJewel(){
+  if (askJewel.busy) return;
+  askJewel.busy = true;
+  send.disabled = true;
+  txt.disabled = true;
+  const q = txt.value.trim();
+  if(!q) return;
+  txt.value = '';
+  // If user pasted a video URL, auto-analyze video instead of standard chat
+  if (/^https?:\/\//.test(q)) {
+    add('You', q);
+    const thinkingVideo = add('Jewel', '(analyzing video...)');
+    // Show embedded video preview (YouTube)
+    let videoEmbed;
+    const ytMatch = q.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+    if (ytMatch) {
+      const vidId = ytMatch[1];
+      videoEmbed = document.createElement('iframe');
+      videoEmbed.src = `https://www.youtube.com/embed/${vidId}`;
+      videoEmbed.width = '320';
+      videoEmbed.height = '180';
+      videoEmbed.allow = 'autoplay; encrypted-media';
+      videoEmbed.frameBorder = '0';
+      chat.appendChild(videoEmbed);
+      chat.scrollTop = chat.scrollHeight;
+    }
+     try {
+       const quick = document.getElementById('quickMode') && document.getElementById('quickMode').checked;
+       const resp = await fetch('/video_summary', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({url: q, every: 30, max_frames: 6, quick})});
+       const data = await resp.json();
+       add('Jewel', data.reply || '(no reply)');
+     } catch (e) {
+       add('Jewel', '(video error) ' + (e.message || e));
+     } finally {
+       thinkingVideo.remove();
+       if (videoEmbed) try { videoEmbed.remove(); } catch {};
+       askJewel.busy = false;
+       send.disabled = false;
+       txt.disabled = false;
+     }
+    return;
+  }
+  add('You', q);
+  const thinking = add('Jewel', '(thinking...)');
+  try {
+    let jReply;
+    const maxAttempts = 2;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const resp = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({text: q})
+        });
+        const data = await resp.json();
+        if (resp.ok && data.reply) {
+          jReply = data.reply;
+          break;
+        } else {
+          throw new Error(data.error || resp.statusText);
+        }
+      } catch (err) {
+         console.warn(`Chat attempt ${attempt} failed:`, err);
+         if (attempt === maxAttempts) {
+           throw err;
+         }
+         await new Promise(r => setTimeout(r, 500));
+      }
+    }
+    thinking.remove();
+    add('Jewel', jReply || '(no reply)');
+  } catch (err) {
+    try { thinking.remove(); } catch (_) {}
+    add('Jewel', '(error) ' + (err.name === 'AbortError' ? 'Request timed out' : err.message || err));
+  }
+  finally {
+    askJewel.busy = false;
+    send.disabled = false;
+    txt.disabled = false;
+  }
+}
+
+send.onclick = askJewel;
+txt.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); askJewel(); } };
+
+// Microphone (ears)
+micBtn.onclick = async ()=>{
+  if(mediaRecorder && mediaRecorder.state === 'recording'){
+    // Stop recording
+    mediaRecorder.stop();
+    micBtn.classList.remove('recording');
+    micBtn.textContent = '🎤 Speak';
+  } else {
+    // Start recording
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      
+      mediaRecorder.ondataavailable = (e) => {
+        audioChunks.push(e.data);
+      };
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'recording.webm');
+        
+        add('You', '(processing audio...)');
+        try{
+          const r = await fetch('/audio', { method: 'POST', body: formData });
+          const j = await r.json();
+          if(j.text){
+            txt.value = j.text;
+            add('You', `🎤 "${j.text}"`);
+          } else {
+            add('Jewel', j.error || '(transcription failed)');
+          }
+        }catch(e){
+          add('Jewel', '(audio error) ' + e);
+        }
+        stream.getTracks().forEach(t => t.stop());
+      };
+      
+      mediaRecorder.start();
+      micBtn.classList.add('recording');
+      micBtn.textContent = '⏹️ Stop';
+    }catch(e){
+      add('Jewel', '(microphone access denied or not available)');
+    }
+  }
+};
+
+// Image upload
+imgBtn.onclick = ()=>{
+  imgForm.style.display = imgForm.style.display==='none' ? 'block' : 'none';
+  vidForm.style.display = 'none';
+  if(googleForm) googleForm.style.display = 'none';
+};
+
+imgSend.onclick = async ()=>{
+  const f = imgFile.files[0];
+  if(!f){ add('Jewel','(pick an image first)'); return; }
+  const form = new FormData();
+  form.append('file', f);
+  form.append('prompt', imgPrompt.value.trim() || 'Describe the image.');
+  add('You', '(uploaded image)');
+  try{
+    const r = await fetch('/vision', { method:'POST', body: form });
+    const j = await r.json();
+    add('Jewel', j.reply || '(no reply)');
+  }catch(e){
+    add('Jewel', '(vision error) ' + e);
+  }
+};
+
+// Video analysis
+vidBtn.onclick = ()=>{
+  vidForm.style.display = vidForm.style.display==='none' ? 'block' : 'none';
+  imgForm.style.display = 'none';
+};
+
+vidSumm.onclick = async ()=>{
+  const url = vidURL.value.trim();
+  if(!url){ add('Jewel','(paste a video URL)'); return; }
+  add('You', `Analyze video: ${url}`);
+  const thinking = add('Jewel', '(downloading & extracting frames...)');
+  try{
+    const quick = document.getElementById('quickMode') && document.getElementById('quickMode').checked;
+    const r = await fetch('/video_summary', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({url, every:30, max_frames:6, quick})});
+    // If quota error, surface helpful guidance and partial info
+    if(r.status === 429){
+      let j = {};
+      try{ j = await r.json(); }catch(_){ }
+      thinking.remove();
+      add('Jewel', '(error) OpenAI quota exceeded — check your API key / billing.');
+      if(j.transcript) add('Jewel', `Transcript (partial): ${j.transcript.substring(0,500)}${j.transcript.length>500? '...':''}`);
+      if(j.frames_extracted) add('Jewel', `(frames extracted: ${j.frames_extracted})`);
+      if(j.visual_summary && j.visual_summary.length){
+        add('Jewel', 'Visual summary:');
+        j.visual_summary.forEach(v => add('Jewel', `• ${v}`));
+      }
+      if(j.fallback_summary && j.fallback_summary.length){
+        add('Jewel', 'Heuristic summary:');
+        j.fallback_summary.forEach(v => add('Jewel', `• ${v}`));
+      }
+      return;
+    }
+    const j = await r.json();
+    thinking.remove();
+    // If the server provided lightweight frames/visual_summary metadata, show them before the reply
+    if(j.frames_extracted) add('Jewel', `(frames extracted: ${j.frames_extracted})`);
+    if(j.visual_summary && j.visual_summary.length){
+      add('Jewel', 'Visual summary:');
+      j.visual_summary.forEach(v => add('Jewel', `• ${v}`));
+    }
+    // If thumbnails were returned, show tiny previews inline
+    if(j.frames && j.frames.length){
+      j.frames.forEach(fdata => {
+        try{
+          const img = document.createElement('img');
+          img.src = fdata;
+          img.style.width = '180px';
+          img.style.height = 'auto';
+          img.style.borderRadius = '6px';
+          img.style.margin = '6px 4px';
+          chat.appendChild(img);
+        }catch(e){/* ignore */}
+      });
+      chat.scrollTop = chat.scrollHeight;
+    }
+    add('Jewel', j.reply || j.error || '(no reply)');
+  }catch(e){
+    try{ thinking.remove(); }catch(_){ }
+    add('Jewel', '(video error) ' + (e.message || e));
+  }
+};
+
+// Google Search widget
+if (searchBtn) {
+  searchBtn.onclick = ()=>{
+    if(googleForm){
+      googleForm.style.display = googleForm.style.display==='none' ? 'block' : 'none';
+    }
+    imgForm.style.display = 'none';
+    vidForm.style.display = 'none';
+  };
+}
+
+// Settings dropdown - simple toggle
+function closeSettingsDropdown(){ 
+  settingsDropdown.classList.remove('open'); 
+  settingsScrim.classList.remove('active');
+}
+
+// Toggle dropdown on button click
+settingsBtn.addEventListener('click', (e)=> {
+  e.preventDefault();
+  e.stopPropagation();
+  const isOpen = settingsDropdown.classList.contains('open');
+  if(isOpen) {
+    closeSettingsDropdown();
+  } else {
+    settingsDropdown.classList.add('open'); 
+    settingsScrim.classList.add('active');
+  }
+});
+
+// Click on scrim (outside dropdown) to close
+settingsScrim.addEventListener('click', (e)=> {
+  closeSettingsDropdown();
+});
+
+// Prevent clicks inside dropdown from closing it
+settingsDropdown.addEventListener('click', (e)=> {
+  e.stopPropagation();
+});
+
+// Escape key to close
+document.addEventListener('keydown', (e)=>{ 
+  if(e.key==='Escape' && settingsDropdown.classList.contains('open')) {
+    closeSettingsDropdown();
+  }
+});
+
+// Voice preview
+if (voicePreview) {
+  voicePreview.onclick = async () => {
+    try{
+      const sample = "Hi, I'm Jewel. How do I sound?";
+      // Respect client-side temporary TTS disable if previously rate-limited
+      try{
+        const disabledUntil = parseInt(localStorage.getItem('jewel:tts_disabled_until') || '0', 10) || 0;
+        if(Date.now() < disabledUntil){
+          add('Jewel', '(TTS temporarily disabled due to rate limits)');
+          return;
+        }
+      }catch(e){}
+
+      const r = await fetch('/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: sample, voice: voiceSelect.value })
+      });
+      // If server indicates rate limit, disable TTS for a short cooldown period
+      if(r.status === 429){
+        try{ const j = await r.json().catch(()=>({})); add('Jewel', `(TTS disabled) ${j.error || 'Rate limited by TTS provider'}`); }catch(e){}
+        // disable for configured minutes
+        try{ const mins = ttsSetCooldownFromInput(); localStorage.setItem('jewel:tts_disabled_until', String(Date.now() + mins * 60 * 1000)); }catch(e){}
+        return;
+      }
+      if(r.status === 202){
+        // queued; server returned id and status_url
+        try{ const j = await r.json().catch(()=>({})); add('Jewel', `(TTS queued) Audio will be available shortly.`); const sid = j.id; if(sid){ pollAndPlayTTS(sid); } }catch(e){}
+        return;
+      }
+      const ctype = r.headers.get('content-type') || '';
+      if(ctype.includes('audio')){
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        speaker.src = url;
+        speaker.style.display = 'block';
+        await speaker.play();
+        // Hide player after playback ends
+        speaker.onended = () => {
+          speaker.style.display = 'none';
+        };
+      } else {
+        const j = await r.json();
+        add('Jewel', j && j.error ? `(TTS) ${j.error}` : '(TTS) No audio returned');
+      }
+    }catch(e){
+      add('Jewel', '(TTS preview error) ' + e);
+    }
+  };
+}
+
+  // Poll a queued TTS job and play when ready
+  async function pollAndPlayTTS(jobId){
+    try{
+      const poll = async ()=>{
+        try{
+          const r = await fetch(`/tts/status/${jobId}`);
+          if(r.status !== 200){ return null; }
+          const j = await r.json();
+          if(j.status === 'done' && j.url){
+            // fetch audio and play
+            const ar = await fetch(j.url);
+            if(ar.ok){ const blob = await ar.blob(); const url = URL.createObjectURL(blob); speaker.src = url; speaker.style.display='block'; await speaker.play(); speaker.onended = ()=>{ speaker.style.display='none'; }; }
+            return true;
+          }
+          if(j.status === 'error'){
+            add('Jewel', `(TTS queue error) ${j.error || 'unknown'}`);
+            return true;
+          }
+          return false;
+        }catch(e){ return false; }
+      };
+      // poll up to 30 times with increasing interval
+      for(let i=0;i<30;i++){
+        const done = await poll();
+        if(done) break;
+        await new Promise(r=>setTimeout(r, 1000 + i*200));
+      }
+    }catch(e){ /* ignore */ }
+  }
+
+// Usage meter
+async function refreshUsage(){
+  try{
+    const r = await fetch('/usage');
+    const u = await r.json();
+    const cap = 50; // USD monthly cap for display
+    const spent = typeof u.cost_total_usd === 'number' ? u.cost_total_usd : 0;
+    usageBadge.textContent = `$${spent.toFixed(2)} / $${cap}`;
+    // Color thresholds: green <80%, yellow 80-95%, red >=95%
+    const p = spent / cap;
+    usageBadge.style.background = p >= 0.95
+      ? 'rgba(220,38,38,0.9)'  // red
+      : p >= 0.80
+      ? 'rgba(245,158,11,0.9)' // yellow
+      : 'rgba(16,185,129,0.6)'; // green
+  }catch(e){ /* ignore */ }
+}
+setInterval(refreshUsage, 60000);
+refreshUsage();
+
+// Load current settings
+async function loadSettings(){
+  try{
+    const r = await fetch('/platform');
+    const s = await r.json();
+    // server-provided defaults
+    themeSelect.value = localStorage.getItem('jewel:theme') || s.ui_theme || 'purple';
+    // Prefer client-selected voice if present
+    voiceSelect.value = localStorage.getItem('jewel:voice') || s.azure_tts_voice || 'en-US-EmmaMultilingualNeural';
+    styleSelect.value = s.response_style || 'friendly';
+    tempInput.value = s.personality_temperature || 0.7;
+    document.body.dataset.theme = themeSelect.value;
+    // Persist speak preference
+    const speakPref = localStorage.getItem('jewel:speak');
+    if(speakPref !== null){ 
+      speakToggle.checked = speakPref === '1'; 
+    } else {
+      // default to speaking enabled for a more natural experience
+      speakToggle.checked = true;
+    }
+    // Load custom colors
+    const colors = JSON.parse(localStorage.getItem('jewel:colors')||'{}');
+    if(colors.primary){
+      document.documentElement.style.setProperty('--primary', colors.primary);
+      colorPrimary.value = colors.primary;
+    }
+    if(colors.secondary){
+      document.documentElement.style.setProperty('--secondary', colors.secondary);
+      colorSecondary.value = colors.secondary;
+    }
+    // Load background image + settings
+    const bg = localStorage.getItem('jewel:bg');
+    const bgO = localStorage.getItem('jewel:bgOpacity');
+    const bgB = localStorage.getItem('jewel:bgBlur');
+    if(bg){ bgDiv.style.backgroundImage = `url(${bg})`; }
+    if(bgO){ document.documentElement.style.setProperty('--bg-opacity', `${parseInt(bgO,10)/100}`); bgOpacity.value = bgO; }
+    if(bgB){ document.documentElement.style.setProperty('--bg-blur', `${bgB}px`); bgBlur.value = bgB; }
+    // Load persona (if any)
+    try{
+      const rp = await fetch('/persona');
+      if(rp.ok){
+        const pj = await rp.json();
+        const p = pj.persona || {};
+        const nameEl = document.getElementById('personaName');
+        if(nameEl) nameEl.value = p.name || '';
+        const colorEl = document.getElementById('personaColor');
+        if(colorEl && p.favorite_color) colorEl.value = p.favorite_color;
+        const tvEl = document.getElementById('personaLikesTV'); if(tvEl) tvEl.checked = !!p.likes_tv;
+        const readEl = document.getElementById('personaLikesReading'); if(readEl) readEl.checked = !!p.likes_reading;
+        const traitsEl = document.getElementById('personaTraits'); if(traitsEl) traitsEl.value = (p.traits || []).join(', ');
+        const reflEl = document.getElementById('personaReflection'); if(reflEl) reflEl.checked = !!p.opt_in_reflection;
+      }
+    }catch(e){ console.warn('Could not load persona', e); }
+
+    // Load local secret for reflections (client-side only)
+    try{
+      const localSecret = localStorage.getItem('jewel:local_secret');
+      const secretEl = document.getElementById('localSecretInput');
+      if(secretEl && localSecret) secretEl.value = localSecret;
+    }catch(e){ /* ignore */ }
+
+    // Load emotion state
+    try{
+      const re = await fetch('/emotion');
+      if(re.ok){
+        const ej = await re.json();
+        const em = ej.emotion || {};
+        const disp = document.getElementById('emotionDisplay');
+        if(disp) disp.textContent = `Valence: ${em.valence ?? 0} — Arousal: ${em.arousal ?? 0}`;
+      }
+    }catch(e){ console.warn('Could not load emotion', e); }
+  }catch(e){
+    console.error('Failed to load settings:', e);
+  }
+}
+
+saveSettings.onclick = async ()=>{
+  const payload = {
+    ui_theme: themeSelect.value,
+    azure_tts_voice: voiceSelect.value,
+    response_style: styleSelect.value,
+    personality_temperature: parseFloat(tempInput.value)
+  };
+  try{
+    const r = await fetch('/platform', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const j = await r.json();
+    if(j.ok){
+      document.body.dataset.theme = themeSelect.value;
+      // Save client-only preferences
+      localStorage.setItem('jewel:theme', themeSelect.value);
+      localStorage.setItem('jewel:voice', voiceSelect.value);
+      localStorage.setItem('jewel:speak', speakToggle.checked ? '1' : '0');
+      const colors = { primary: colorPrimary.value, secondary: colorSecondary.value };
+      localStorage.setItem('jewel:colors', JSON.stringify(colors));
+      document.documentElement.style.setProperty('--primary', colors.primary);
+      document.documentElement.style.setProperty('--secondary', colors.secondary);
+      add('Jewel', '✨ Settings saved! My platform has been customized.');
+      closeSettingsDropdown();
+    } else {
+      console.error('Settings save failed:', j);
+    }
+  }catch(e){
+    console.error('Settings error:', e);
+    add('Jewel', '(settings error) ' + e);
+  }
+};// Background handlers
+bgFile.onchange = () => {
+  const f = bgFile.files && bgFile.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    try {
+      localStorage.setItem('jewel:bg', dataUrl);
+    } catch(e) {
+      add('Jewel', '(background too large to store — try a smaller image)');
+      return;
+    }
+    bgDiv.style.backgroundImage = `url(${dataUrl})`;
+    add('Jewel', '🖼️ Background image set.');
+  };
+  reader.readAsDataURL(f);
+};
+
+bgOpacity.oninput = () => {
+  const val = parseInt(bgOpacity.value, 10);
+  localStorage.setItem('jewel:bgOpacity', String(val));
+  document.documentElement.style.setProperty('--bg-opacity', String(val/100));
+};
+
+bgBlur.oninput = () => {
+  const val = parseInt(bgBlur.value, 10);
+  localStorage.setItem('jewel:bgBlur', String(val));
+  document.documentElement.style.setProperty('--bg-blur', `${val}px`);
+};
+
+bgClear.onclick = () => {
+  localStorage.removeItem('jewel:bg');
+  bgDiv.style.backgroundImage = 'none';
+  add('Jewel', 'Background image removed.');
+};
+
+// Initialize
+loadSettings();
+add('Jewel', 'Hey! What can I help you with today? 🎤👁️💎');
+// One-time auto-demo greeting: send a short test message on first page load
+try{
+  const didGreet = localStorage.getItem('jewel:did_auto_greet');
+  if(!didGreet){
+    // mark immediately so refresh won't resend
+    try{ localStorage.setItem('jewel:did_auto_greet','1'); }catch(e){}
+    // populate the input and trigger the chat flow once
+    try{
+      txt.value = 'Hi Jewel — this is a quick demo. Say hello!';
+      // short delay to allow UI to settle
+      setTimeout(()=>{ try{ askJewel(); }catch(e){} }, 600);
+    }catch(e){ console.warn('Auto-greet failed', e); }
+  }
+}catch(e){ /* ignore */ }
+
+// Persona save/reset handlers
+const savePersonaBtn = document.getElementById('savePersona');
+if(savePersonaBtn){
+  savePersonaBtn.onclick = async ()=>{
+    try{
+      const payload = {
+        name: document.getElementById('personaName').value || 'Jewel',
+        favorite_color: document.getElementById('personaColor').value,
+        likes_tv: document.getElementById('personaLikesTV').checked,
+        likes_reading: document.getElementById('personaLikesReading').checked,
+        traits: (document.getElementById('personaTraits').value || '').split(',').map(s=>s.trim()).filter(Boolean),
+        opt_in_reflection: document.getElementById('personaReflection').checked
+      };
+      const r = await fetch('/persona', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      const j = await r.json();
+      if(r.ok){ add('Jewel', 'Persona saved.'); }
+      else add('Jewel', '(persona save error) ' + (j.error||''));
+    }catch(e){ add('Jewel', '(persona save error) ' + e); }
+  };
+}
+const resetPersonaBtn = document.getElementById('resetPersona');
+if(resetPersonaBtn){
+  resetPersonaBtn.onclick = async ()=>{
+    if(!confirm('Reset persona to defaults? This will clear persisted preferences.')) return;
+    try{
+      const r = await fetch('/persona/reset', { method: 'POST' });
+      const j = await r.json();
+      if(r.ok){ add('Jewel', 'Persona reset.'); loadSettings(); }
+      else add('Jewel', '(persona reset error) ' + (j.error||''));
+    }catch(e){ add('Jewel', '(persona reset error) ' + e); }
+  };
+}
+
+  // Private reflections handlers (requires local secret)
+  const localSecretInput = document.getElementById('localSecretInput');
+  const showReflectionsBtn = document.getElementById('showReflections');
+  const resetReflectionsBtn = document.getElementById('resetReflections');
+
+  if(showReflectionsBtn){
+    showReflectionsBtn.onclick = async ()=>{
+      try{
+        const secret = (localSecretInput && localSecretInput.value) ? localSecretInput.value.trim() : null;
+        if(!secret){
+          if(!confirm('No local secret is set. Would you like to enter one now?')) return;
+        }
+        // save secret to localStorage for convenience
+        try{ if(secret) localStorage.setItem('jewel:local_secret', secret); }catch(e){}
+
+        const headers = {};
+        if(secret) headers['X-LOCAL-SECRET'] = secret;
+        const r = await fetch('/reflections', { method: 'GET', headers });
+        if(r.status === 403){
+          const j = await r.json().catch(()=>({error: 'forbidden'}));
+          add('Jewel', '(reflections) ' + (j.error||'forbidden - check local secret')); 
+          return;
+        }
+        if(!r.ok){
+          const j = await r.json().catch(()=>({error:'unknown'}));
+          add('Jewel', '(reflections error) ' + (j.error || r.statusText));
+          return;
+        }
+        const j = await r.json();
+        const items = j.reflections || [];
+        if(items.length === 0) {
+          add('Jewel', '(reflections) No private reflections found.');
+        } else {
+          add('Jewel', `(reflections) Showing ${items.length} private reflections:`);
+          items.forEach(it => {
+            const when = it.created_at ? ` (${it.created_at})` : '';
+            add('Jewel', `• ${it.content}${when}`);
+          });
+        }
+      }catch(e){ add('Jewel', '(reflections error) ' + (e.message || e)); }
+    };
+  }
+
+  // Re-enable TTS button (clear cooldown)
+  const reEnableBtn = document.getElementById('reEnableTTS');
+  const ttsCooldownInput = document.getElementById('ttsCooldownMinutes');
+  if(reEnableBtn){
+    reEnableBtn.onclick = ()=>{
+      try{ localStorage.removeItem('jewel:tts_disabled_until'); add('Jewel', 'TTS re-enabled for this browser.'); }catch(e){ add('Jewel','(could not re-enable TTS)'); }
+    };
+  }
+  // Respect configurable cooldown length when we set it after rate-limit
+  function ttsSetCooldownFromInput(){
+    try{
+      const mins = parseInt(ttsCooldownInput.value || '10', 10) || 10;
+      return Math.max(1, Math.min(60, mins));
+    }catch(e){ return 10; }
+  }
+
+  if(resetReflectionsBtn){
+    resetReflectionsBtn.onclick = async ()=>{
+      if(!confirm('Reset (delete) all private reflections? This action cannot be undone.')) return;
+      try{
+        const secret = (localSecretInput && localSecretInput.value) ? localSecretInput.value.trim() : null;
+        const headers = { 'Content-Type': 'application/json' };
+        if(secret) headers['X-LOCAL-SECRET'] = secret;
+        const r = await fetch('/reflections/reset', { method: 'POST', headers });
+        const j = await r.json().catch(()=>({error:null}));
+        if(r.ok){ add('Jewel', 'Private reflections cleared.'); } else { add('Jewel', '(reflections reset error) ' + (j.error || r.statusText)); }
+      }catch(e){ add('Jewel', '(reflections reset error) ' + (e.message || e)); }
+    };
+  }
+
+// Emotion handlers
+const triggerEmotionBtn = document.getElementById('triggerEmotion');
+if(triggerEmotionBtn){
+  triggerEmotionBtn.onclick = async ()=>{
+    try{
+      const tag = document.getElementById('emotionTag').value.trim();
+      const r = await fetch('/emotion/trigger', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ delta_valence: 0.2, delta_arousal: 0.1, tag: tag || null }) });
+      const j = await r.json();
+      if(r.ok && j.emotion){
+        const disp = document.getElementById('emotionDisplay'); if(disp) disp.textContent = `Valence: ${j.emotion.valence} — Arousal: ${j.emotion.arousal}`;
+        add('Jewel', `Emotion updated: ${j.emotion.tags ? j.emotion.tags.join(', ') : ''}`);
+      } else add('Jewel', '(emotion trigger error) ' + (j.error||''));
+    }catch(e){ add('Jewel', '(emotion trigger error) ' + e); }
+  };
+}
+const resetEmotionBtn = document.getElementById('resetEmotionBtn');
+if(resetEmotionBtn){
+  resetEmotionBtn.onclick = async ()=>{
+    if(!confirm('Reset emotion state?')) return;
+    try{
+      const r = await fetch('/emotion/reset', { method: 'POST' });
+      const j = await r.json();
+      if(r.ok && j.emotion){ const disp = document.getElementById('emotionDisplay'); if(disp) disp.textContent = `Valence: ${j.emotion.valence} — Arousal: ${j.emotion.arousal}`; add('Jewel', 'Emotion reset.'); }
+      else add('Jewel', '(emotion reset error) ' + (j.error||''));
+    }catch(e){ add('Jewel', '(emotion reset error) ' + e); }
+  };
+}
+
+async function ttsSpeak(text){
+  try{
+    // Respect client-side temporary TTS disable if previously rate-limited
+    try{
+      const disabledUntil = parseInt(localStorage.getItem('jewel:tts_disabled_until') || '0', 10) || 0;
+      if(Date.now() < disabledUntil){
+        // don't spam user with network errors; silently skip TTS
+        return;
+      }
+    }catch(e){}
+
+    const r = await fetch('/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice: voiceSelect.value })
+    });
+    if(r.status === 429){
+      try{ const j = await r.json().catch(()=>({})); add('Jewel', `(TTS disabled) ${j.error || 'Rate limited by TTS provider'}`); }catch(e){}
+      try{ const mins = ttsSetCooldownFromInput(); localStorage.setItem('jewel:tts_disabled_until', String(Date.now() + mins * 60 * 1000)); }catch(e){}
+      return;
+    }
+    if(r.status === 202){
+      try{ const j = await r.json().catch(()=>({})); if(j.id){ /* queued - don't block speech */ } }catch(e){}
+      return;
+    }
+    const ctype = r.headers.get('content-type') || '';
+    if(ctype.includes('audio')){
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      speaker.src = url;
+      speaker.style.display = 'block';
+      await speaker.play();
+    } else {
+      const j = await r.json();
+      if(j && j.error){
+        add('Jewel', `(TTS disabled) ${j.error}`);
+      }
+    }
+  }catch(e){
+    console.warn('TTS error', e);
+  }
+}
+
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/ui/sw.js')
+      .then(reg => console.log('Service Worker registered!', reg))
+      .catch(err => console.log('Service Worker registration failed:', err));
+  });
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button/banner
+  setTimeout(() => {
+    if (confirm('Install Jewel as an app for the best experience?')) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        }
+        deferredPrompt = null;
+      });
+    }
+  }, 5000); // Show after 5 seconds
+});
+
+}); // End DOMContentLoaded
+</script>
+</body>
+</html>

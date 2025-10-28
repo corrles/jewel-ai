@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+openai
+python-dotenv
+vosk
+yt-dlp
+aiofiles
+requests
+python-multipart
+pillow
+youtube-transcript-api
+pyaudio

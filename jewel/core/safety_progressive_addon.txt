@@ -1,0 +1,43 @@
+﻿# Add after _init_patterns method
+    
+    def _get_warning_level(self, user_id: str):
+        """Get current warning level for user"""
+        if not user_id:
+            return {"warning_count": 0, "status": "GOOD_STANDING"}
+        cur = self.conn.cursor()
+        cur.execute("SELECT warning_count, status, restriction_until FROM warning_levels WHERE user_id = ?", (user_id,))
+        row = cur.fetchone()
+        if row:
+            return {"warning_count": row[0], "status": row[1], "restriction_until": row[2]}
+        return {"warning_count": 0, "status": "GOOD_STANDING"}
+    
+    def _increment_warning(self, user_id: str, category: str):
+        """Increment warning count and return action"""
+        from datetime import datetime, timedelta
+        if not user_id:
+            return "BLOCKED"
+        
+        level = self._get_warning_level(user_id)
+        new_count = level["warning_count"] + 1
+        cur = self.conn.cursor()
+        
+        if new_count == 1:
+            action, status = "WARNING", "WARNED"
+            cur.execute("INSERT OR REPLACE INTO warning_levels (user_id, warning_count, last_warning_at, status) VALUES (?, ?, ?, ?)",
+                (user_id, new_count, datetime.now().isoformat(), status))
+        elif new_count == 2:
+            action, status = "TEMPORARY_RESTRICTION", "RESTRICTED"
+            restriction_until = (datetime.now() + timedelta(hours=1)).isoformat()
+            cur.execute("INSERT OR REPLACE INTO warning_levels (user_id, warning_count, last_warning_at, restriction_until, status) VALUES (?, ?, ?, ?, ?)",
+                (user_id, new_count, datetime.now().isoformat(), restriction_until, status))
+        elif new_count == 3:
+            action, status = "ACCOUNT_REVIEW", "UNDER_REVIEW"
+            cur.execute("INSERT OR REPLACE INTO warning_levels (user_id, warning_count, last_warning_at, status) VALUES (?, ?, ?, ?)",
+                (user_id, new_count, datetime.now().isoformat(), status))
+        else:
+            action, status = "BANNED", "BANNED"
+            cur.execute("INSERT OR REPLACE INTO warning_levels (user_id, warning_count, last_warning_at, status) VALUES (?, ?, ?, ?)",
+                (user_id, new_count, datetime.now().isoformat(), status))
+        
+        self.conn.commit()
+        return action

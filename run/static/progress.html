@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Jewel — Progress Dashboard</title>
+  <style>
+    body{font-family:system-ui, -apple-system, Roboto, Arial; margin:0; padding:20px; background:#f7fafc; color:#111}
+    header{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    h1{font-size:20px; margin:0}
+    .card{background:white;border-radius:8px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.06);margin-top:12px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    pre{white-space:pre-wrap;word-break:break-word}
+    a.button{display:inline-block;padding:8px 12px;background:#667eea;color:#fff;border-radius:6px;text-decoration:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Progress dashboard — quick view for Jane</h1>
+      <div style="color:#666;font-size:13px;margin-top:6px">This page shows high-level status and quick actions Jane can take.</div>
+    </div>
+    <div>
+      <a class="button" href="/ui/chat_enhanced.html">Open Chat</a>
+      <a class="button" href="/DESIGN_GUIDE.md" style="background:#48bb78;margin-left:8px;">Design Guide</a>
+    </div>
+  </header>
+
+  <div class="card">
+    <h3>Usage</h3>
+    <div id="usage">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h3>Scheduled tasks</h3>
+    <div id="tasks">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h3>Quick handoffs for Jane</h3>
+    <ul>
+      <li>Redesign header and theme (see <a href="/DESIGN_GUIDE.md">Design Guide</a>).</li>
+      <li>Improve accessibility (contrast, font sizes).</li>
+      <li>Polish chat message card styling and spacing.</li>
+      <li>Create 2–3 alternate color themes and preview controls.</li>
+      <li>Make mobile layout more compact (reduce margins, stack controls).</li>
+    </ul>
+  </div>
+
+  <script>
+    async function loadUsage(){
+      try{ const r = await fetch('/usage'); const j = await r.json(); document.getElementById('usage').textContent = JSON.stringify(j, null, 2); }catch(e){ document.getElementById('usage').textContent = 'Could not load usage: '+e; }
+    }
+    async function loadTasks(){
+      try{ const r = await fetch('/tasks'); const j = await r.json(); const el = document.getElementById('tasks'); el.innerHTML = '';
+        if(j.tasks && j.tasks.length){
+          const ul = document.createElement('ul'); j.tasks.forEach(t=>{ const li = document.createElement('li'); li.textContent = `${t.id}: ${t.payload && t.payload.text ? t.payload.text : JSON.stringify(t.payload||{})} (run_at: ${t.run_at||t.scheduled_at||''})`; ul.appendChild(li); }); el.appendChild(ul);
+        } else { el.textContent = '(no scheduled tasks)'; }
+      }catch(e){ document.getElementById('tasks').textContent = 'Could not load tasks: '+e; }
+    }
+    loadUsage(); loadTasks();
+    setInterval(loadUsage, 60000);
+  </script>
+</body>
+</html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jewel — Progress Dashboard</title>
+  <link rel="stylesheet" href="/ui/team_theme.css">
+  <style>
+    body{font-family:system-ui, -apple-system, Roboto, 'Segoe UI', Arial; margin:24px; color:#0f172a}
+    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(12,23,56,0.08);margin-bottom:16px}
+    h1{margin:0 0 8px}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    .key{font-weight:700;color:#0f172a}
+    .muted{color:#64748b}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;background:#4f46e5;color:white;text-decoration:none}
+    .todo {list-style:none;padding-left:0}
+    .todo li{padding:8px 0;border-bottom:1px dashed #eef2ff}
+    .small{font-size:13px;color:#475569}
+    img.preview{max-width:100%;border-radius:8px;box-shadow:0 4px 12px rgba(2,6,23,0.08)}
+  </style>
+</head>
+<body>
+  <div style="max-width:1100px;margin:0 auto;">
+    <h1>Jewel — Progress</h1>
+    <p class="muted">A lightweight dashboard showing current health, usage, tasks and quick links for Jane to take design ownership.</p>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="key">System status</div>
+              <div id="healthText" class="small">Loading...</div>
+            </div>
+            <div>
+              <a class="btn" href="/ui/chat_enhanced.html" target="_blank">Open UI</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="key">Usage (est.)</div>
+          <div id="usageBox" class="small">Loading usage...</div>
+        </div>
+
+        <div class="card">
+          <div class="key">Scheduler / Tasks</div>
+          <div id="tasksBox" class="small">Loading tasks...</div>
+        </div>
+
+        <div class="card">
+          <div class="key">Persona & Platform</div>
+          <div id="personaBox" class="small">Loading persona...</div>
+          <div id="platformBox" class="small" style="margin-top:8px">Loading platform...</div>
+        </div>
+
+        <div class="card">
+          <div class="key">Quick actions</div>
+          <div style="margin-top:8px">
+            <a class="btn" id="refreshBtn" href="#">Refresh</a>
+            <a class="btn" id="openDesignGuidelines" href="/ui/../DESIGN_GUIDELINES.md" style="margin-left:8px">Design Guidelines</a>
+          </div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="card">
+          <div class="key">Design handoff for Jane</div>
+          <p class="small">Jane can take ownership of the visual redesign. Below are suggested tasks she can pick up — click any to mark done locally.</p>
+          <ul class="todo" id="designTodo">
+            <li data-id="d1"><strong>Update header</strong><br><span class="small muted">Simplify header, add team controls and accessibility labels.</span></li>
+            <li data-id="d2"><strong>Modern theme</strong><br><span class="small muted">Polish colors, spacing and fonts; preview with toggle.</span></li>
+            <li data-id="d3"><strong>Mobile layout</strong><br><span class="small muted">Ensure chat and controls stack nicely on small screens.</span></li>
+            <li data-id="d4"><strong>Refined buttons & icons</strong><br><span class="small muted">Replace text pills with accessible icon buttons and tooltips.</span></li>
+            <li data-id="d5"><strong>Create style guide</strong><br><span class="small muted">Add a short MD file listing colors, fonts, spacing & components.</span></li>
+          </ul>
+          <div style="margin-top:12px"><a id="exportReport" class="btn" href="#">Export snapshot</a></div>
+        </div>
+
+        <div class="card">
+          <div class="key">Preview</div>
+          <p class="small muted">Toggle the theme below to preview the proposed style without changing files.</p>
+          <div style="margin-top:8px">
+            <label class="small"><input type="checkbox" id="previewTheme"> Use team preview theme</label>
+          </div>
+          <div style="margin-top:12px" id="previewArea">
+            <img class="preview" src="/static/img/placeholder.png" alt="preview" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer style="margin-top:18px; color:#64748b; font-size:13px">This dashboard is local to your machine and reads from Jewel's public endpoints. For production access, secure the static page behind auth.</footer>
+  </div>
+
+<script>
+async function fetchJson(path){ try{ const r = await fetch(path); if(!r.ok) return {error:r.statusText, status:r.status}; return await r.json(); }catch(e){ return {error:e.message}; } }
+
+async function refresh(){
+  document.getElementById('healthText').textContent='Checking...';
+  const h = await fetchJson('/health');
+  document.getElementById('healthText').textContent = h && h.ok ? 'OK' : ('Error: ' + (h && h.error || 'unknown'));
+
+  const u = await fetchJson('/usage');
+  if(u && !u.error){ document.getElementById('usageBox').textContent = `Month ${u.month} — $${u.cost_total_usd} (text $${u.cost_text_usd}, tts $${u.cost_tts_usd})`; } else { document.getElementById('usageBox').textContent = 'Could not load usage'; }
+
+  const t = await fetchJson('/tasks');
+  if(t && t.tasks){ document.getElementById('tasksBox').textContent = `${t.tasks.length} scheduled tasks (showing first 5)`; } else document.getElementById('tasksBox').textContent = 'No tasks or failed to load';
+
+  const p = await fetchJson('/persona'); if(p && p.persona){ document.getElementById('personaBox').textContent = JSON.stringify(p.persona); } else document.getElementById('personaBox').textContent = 'Could not load persona';
+
+  const pl = await fetchJson('/platform'); if(pl && !pl.error){ document.getElementById('platformBox').textContent = `Model: ${pl.model} — Persona: ${pl.persona}`; } else document.getElementById('platformBox').textContent = 'Could not load platform';
+}
+
+document.getElementById('refreshBtn').addEventListener('click', (e)=>{ e.preventDefault(); refresh(); });
+
+// Simple local todo toggles
+const designTodo = document.getElementById('designTodo'); designTodo.addEventListener('click', (e)=>{ const li = e.target.closest('li'); if(!li) return; li.style.opacity = li.style.opacity==='0.5'? '1':'0.5'; });
+
+// Theme preview toggle — toggles a query param on body so CSS can react
+const previewCheckbox = document.getElementById('previewTheme'); previewCheckbox.addEventListener('change', (e)=>{
+  if(e.target.checked){ document.documentElement.setAttribute('data-team-preview','1'); } else { document.documentElement.removeAttribute('data-team-preview'); }
+});
+
+document.getElementById('exportReport').addEventListener('click', (e)=>{ e.preventDefault(); const data = { when: new Date().toISOString(), health: document.getElementById('healthText').textContent, usage: document.getElementById('usageBox').textContent }; const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'jewel_progress_snapshot.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+
+refresh();
+</script>
+</body>
+</html>

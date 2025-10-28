@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Jewel Debug</title>
+  <style>body{font-family:Segoe UI,Arial;margin:20px}button{margin:6px;padding:8px}pre{background:#111;color:#dfe; padding:12px;border-radius:6px;max-height:400px;overflow:auto}</style>
+</head>
+<body>
+  <h1>Jewel — Debug</h1>
+  <p>Use the controls below to run a sample video analysis and view server logs. This page is for local development only.</p>
+  <div>
+    <button id="runSample">Run sample video_summary</button>
+    <input id="urlInput" style="width:60%" value="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+  </div>
+  <h3>Response</h3>
+  <pre id="resp">(no response yet)</pre>
+  <h3>Server stderr (tail)</h3>
+  <button id="refreshLogs">Refresh Logs</button>
+  <pre id="logs">(logs will appear here)</pre>
+
+<script>
+document.getElementById('runSample').onclick = async ()=>{
+  const url = document.getElementById('urlInput').value;
+  document.getElementById('resp').textContent = 'Running...';
+  try{
+    const r = await fetch('/video_summary', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({url, every:30, max_frames:3})});
+    const j = await r.json();
+    document.getElementById('resp').textContent = JSON.stringify(j, null, 2);
+  }catch(e){
+    document.getElementById('resp').textContent = 'Request failed: ' + e;
+  }
+};
+
+document.getElementById('refreshLogs').onclick = async ()=>{
+  document.getElementById('logs').textContent = 'Loading...';
+  try{
+    const r = await fetch('/debug/logs');
+    const text = await r.text();
+    document.getElementById('logs').textContent = text;
+  }catch(e){
+    document.getElementById('logs').textContent = 'Failed to load logs: ' + e;
+  }
+};
+</script>
+</body>
+</html>

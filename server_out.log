@@ -1,0 +1,2 @@
+INFO:     127.0.0.1:65377 - "GET /reflections HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52890 - "POST /persona HTTP/1.1" 422 Unprocessable Content

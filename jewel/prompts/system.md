@@ -1,0 +1,1 @@
+# This file defines Jewel's core persona. Use SYSTEM_PROMPT() to render.

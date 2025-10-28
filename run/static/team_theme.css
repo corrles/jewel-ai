@@ -1,0 +1,29 @@
+/* Team preview theme: gentle modern palette suitable for quick prototyping */
+:root[data-team-preview='1'] {
+  --bg: #0f172a;
+  --card: #0b1220;
+  --text: #e6eef8;
+  --muted: #9fb0d6;
+  --accent: #7c3aed;
+}
+
+:root[data-team-preview='1'] body {
+  background: linear-gradient(180deg, #071129 0%, #07172a 100%);
+  color: var(--text);
+}
+
+:root[data-team-preview='1'] .card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border: 1px solid rgba(124,58,237,0.12);
+}
+
+:root[data-team-preview='1'] .btn {
+  background: linear-gradient(90deg, var(--accent), #5b21b6);
+  box-shadow: 0 6px 18px rgba(124,58,237,0.12);
+}
+
+:root[data-team-preview='1'] h1, :root[data-team-preview='1'] .key { color: var(--text); }
+:root[data-team-preview='1'] .small { color: var(--muted); }
+
+/* Some tweaks for the primary UI previewing (chat_enhanced will pick this up when preview is toggled) */
+:root[data-team-preview='1'] .pill { background: transparent; border-color: rgba(255,255,255,0.08); color: var(--text); }
